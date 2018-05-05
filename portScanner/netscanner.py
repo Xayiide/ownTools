@@ -76,9 +76,7 @@ def main():
         address_queue.put(net + "." + str(host))
 
 
-    pingers = []
-    for _ in range(MAX_PINGERS):
-        pingers.append(Thread(target=IPscan, args=(address_queue,)))
+    pingers = [Thread(target=IPscan, args=(address_queue,)) for _ in range(MAX_PINGERS)]
 
     start_time = time.time()
     for pinger in pingers:
