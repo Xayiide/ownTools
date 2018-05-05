@@ -9,8 +9,12 @@ arpSpoofer:
 
 netscanner:
   This page helped me with the thread Queue [https://codereview.stackexchange.com/questions/13683/pinging-a-list-of-hosts]
-
+  fping is used (as it has lower timeout options than ping)
+  sudo apt-get install fping
 
 
 # !!
 pip3 install -r requirements.txt
+
+
+# !!
