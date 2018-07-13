@@ -51,7 +51,7 @@ def arpSpoof(gwIP, gwMAC, tgtIP, tgtMAC):
 
 def main():
     parser = optparse.OptionParser("Usage %prog " + \
-            "-t <target IP -g <gateway IP")
+            "-t <target IP> -g <gateway IP>")
 
     parser.add_option('-t', dest='tgtIP', type='string', \
             help='specify target IP')
