@@ -11,7 +11,6 @@ from threading import *
 #printLock = Lock()
 
 # Define the thread Queue
-pingers_queue = queue.Queue() # Max amount of threads in the Queue is 8 (as 8 is the # of cores my cpu has)
 address_queue = queue.Queue() # Queue of addresses that haven't been pinged yet
 
 # Define the max amount of threads to run
