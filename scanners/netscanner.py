@@ -5,7 +5,7 @@ import time
 import ipaddress
 from threading import *
 
-
+# updated
 
 # Define the lock for the threads to share the screen
 #printLock = Lock()
@@ -44,7 +44,7 @@ def IPscan(toPingQueue):
 #       printLock.acquire()
 #       print("[-] No more addresses to ping.") # Prints out once for every thread
 
-    
+
 #   finally:
 #       printLock.release()
 
@@ -72,7 +72,7 @@ def main():
         MAX_PINGERS = thr
     if tmo != None:
         TIMEOUT = tmo
-    
+
     net = ipaddress.IPv4Network(net)
 
 
@@ -85,7 +85,7 @@ def main():
     start_time = time.time()
     for pinger in pingers:
         pinger.start()
-    
+
     for pinger in pingers:
         pinger.join()
 
@@ -95,4 +95,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
