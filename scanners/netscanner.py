@@ -19,6 +19,18 @@ MAX_PINGERS = 4
 # Define the timeout (in miliseconds)
 TIMEOUT = 300
 
+def testUp(address):
+    isUp   = False
+    count  = 0
+    while (not isUp and count < 4):
+        ping = subprocess.call(['fping', '-c', '1', '-t', str(TIMEOUT), address], \
+                    stdout=subprocess.DEVNULL, \
+                    stderr=subprocess.DEVNULL)
+        if ping == 0:
+            isUp = True
+        else:
+            count += 1
+    return isUp
 
 def IPscan(toPingQueue):
     """
@@ -31,10 +43,8 @@ def IPscan(toPingQueue):
 #       printLock.acquire()
         while True:
             address = toPingQueue.get_nowait() # Get an address to ping
-            exitStatus = subprocess.call(['fping', '-c', '1', '-t', str(TIMEOUT), address], \
-                    stdout=subprocess.DEVNULL, \
-                    stderr=subprocess.DEVNULL)
-            if exitStatus == 0:
+            exitStatus = testUp(address)
+            if exitStatus:
                 print("[+]", address, "up")
 #           else:
 #               print("[-]", address, "seems down")
