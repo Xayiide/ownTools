@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <fcntl.h> // for open
 #include <unistd.h> // for close
+#include <pthread.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -15,7 +16,8 @@
 #define BUFF 256
 #define AMNT 5
 
-int socket_array[AMNT];
+char banner[BUFF] = "You reached the server\n";
+int socket_array[AMNT] = {-1, -1, -1, -1, -1};
 int socket_count = 0;
 
 void broadcast(int socket, char* msg, int flags) {
@@ -24,8 +26,52 @@ void broadcast(int socket, char* msg, int flags) {
             send(socket, msg, sizeof(msg), flags);
 }
 
+void remove_socket(int client_socket) {
+    int found = 0;
+    if (socket_array[socket_count-1] == client_socket) {
+        socket_array[socket_count-1] = -1;
+    }
+    for (int sock = 0; sock < socket_count -1; sock++) {
+        if (socket_array[sock] == client_socket)
+            found = 1;
+        if (found) {
+            socket_array[sock] = socket_array[sock+1];
+        }
+    }
+    if (found)
+        socket_count--;
+}
+
+void* handle_client(int client_socket, struct sockaddr_in client_addr) {
+    int  connected = 1;
+    char user[21]; // xxx.xxx.xxx.xxx:ppppp in the longest case
+    char bcastmsg[40];
+    char msg[BUFF];
+
+    sprintf(user, "%s:%d", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+    sprintf(bcastmsg, "[!!] %s connected", user);
+
+    send(client_socket, banner, sizeof(banner), 0);
+    broadcast(client_socket, bcastmsg, 0);
+
+    while(connected) {
+        recv(client_socket, &msg, sizeof(msg), 0);
+        if(strcmp(msg, "") != 0) { // If something was sent
+            sprintf(msg, "<%s> %s", user, msg);
+            printf("[+] %s\n", msg);
+            broadcast(client_socket, msg, 0);
+        }
+        else { // No message received
+            remove_socket(client_socket);
+            sprintf(msg, "[!!] %s disconnected", user);
+            printf("[+] %s disconnected\n", user);
+            broadcast(client_socket, msg, 0);
+            connected = 0;
+        }
+    }
+}
+
 int main() {
-    char banner[BUFF] = "You reached the server\n";
     int  serv_sock    = socket(AF_INET, SOCK_STREAM, 0); /* Create socket */
     int  clnt_sock;
     socklen_t sock_size = sizeof(struct sockaddr_in);
@@ -45,10 +91,12 @@ int main() {
 
     while(1) {
         clnt_sock = accept(serv_sock, (struct sockaddr *) &clnt_addr, &sock_size);
-        printf("[+] Received connection from [%s:%d]\n", inet_ntoa(clnt_addr.sin_addr), ntohs(clnt_addr.sin_port));
+        printf("[+] Connection from [%s:%d]\n", inet_ntoa(clnt_addr.sin_addr), ntohs(clnt_addr.sin_port));
         socket_array[socket_count] = clnt_sock;
         socket_count++;
-        send(clnt_sock, banner, sizeof(banner), 0);
+        
+        // New thread calling handle_client(clnt_sock, (struct sockaddr *) &clnt_addr)
+        // send(clnt_sock, banner, sizeof(banner), 0);
     }
     close(serv_sock);
 
